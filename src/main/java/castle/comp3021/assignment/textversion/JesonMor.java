@@ -202,6 +202,7 @@ public class JesonMor extends Game {
      */
     public @NotNull Move[] getAvailableMoves(Player player) {
         //TODO
+
         return null;
     }
 
