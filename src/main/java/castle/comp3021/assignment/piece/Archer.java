@@ -64,8 +64,8 @@ public class Archer extends Piece {
         }
 
         return moves.stream()
-                .filter(move -> validateMove(game, move))
-                .toArray(Move[]::new);
+                    .filter(move -> validateMove(game, move))
+                    .toArray(Move[]::new);
     }
 
     /**
@@ -99,8 +99,7 @@ public class Archer extends Piece {
                 new ArcherMoveRule(),
                 new CriticalRegionRule(),
         };
-        for (var rule :
-                rules) {
+        for (var rule : rules) {
             if (!rule.validate(game, move)) {
                 return false;
             }

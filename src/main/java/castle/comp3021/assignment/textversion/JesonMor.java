@@ -41,6 +41,11 @@ public class JesonMor extends Game {
 
     private List<MoveRecord> moveRecords = new ArrayList<>();
 
+    // helper variables for undo()
+    private final List<Integer[]> lastScores = new ArrayList<>();
+    private final List<Piece> lastPieces = new ArrayList<>();
+
+
     /**
      * Start the game
      * Players will take turns according to the order in {@link Configuration#getPlayers()} to make a move until
@@ -56,7 +61,6 @@ public class JesonMor extends Game {
         this.board = configuration.getInitialBoard();
         this.currentPlayer = null;
         this.refreshOutput();
-
 
         while (true) {
             var player = this.configuration.getPlayers()[this.numMoves % this.configuration.getPlayers().length];
@@ -74,6 +78,10 @@ public class JesonMor extends Game {
                     winner = player;
                 }
             } else {
+                // stored information for undo()
+                this.lastScores.add(new Integer[]{this.configuration.getPlayers()[0].getScore(),
+                        this.configuration.getPlayers()[1].getScore()});
+
                 var move = player.nextMove(this, availableMoves);
                 var movedPiece = this.getPiece(move.getSource());
                 // make move
@@ -81,7 +89,7 @@ public class JesonMor extends Game {
                 this.numMoves++;
                 System.out.println(player.getName() + " moved piece at " + move.getSource() + "to " + move.getDestination());
                 this.updateScore(player, movedPiece, move);
-
+                this.lastPieces.add(movedPiece);
                 this.refreshOutput();
 
                 // check if there is a winner and if there is, return the winner.
@@ -94,8 +102,7 @@ public class JesonMor extends Game {
                 System.out.printf("Winner: %s%s%s\n", player.getColor(), player.getName(), Color.DEFAULT);
                 this.winner = winner;
                 // stop all threads
-                for (var entry :
-                        this.configuration.getPieceThreadMap().entrySet()) {
+                for (var entry : this.configuration.getPieceThreadMap().entrySet()) {
                     entry.getKey().terminate();
                     entry.getValue().interrupt();
                 }
@@ -202,9 +209,50 @@ public class JesonMor extends Game {
      */
     public @NotNull Move[] getAvailableMoves(Player player) {
         //TODO
+        var moves = new ArrayList<Move>();
+        // find all pieces belonging to the player
+        for (int i = 0; i < this.configuration.getSize(); i++) {
+            for (int j = 0; j < this.configuration.getSize(); j++) {
+                var piece = this.getPiece(i, j);
+                if (piece == null) {
+                    continue;
+                }
+                if (!piece.getPlayer().equals(player)) {
+                    continue;
+                }
+                var candidateMoves = piece.getAvailableMoves(this, new Place(i, j));
+                moves.addAll(Arrays.asList(candidateMoves));
+            }
+        }
+        return moves.toArray(new Move[0]);
 
-        return null;
+        /*var moves = new ArrayList<Move>();
+        for (int i = 0; i < this.configuration.getSize(); i++) {
+            for (int j = 0; j < this.configuration.getSize(); j++) {
+                var piece = this.getPiece(i, j);
+                if (piece == null) {
+                    continue;
+                }
+
+                if (!piece.getPlayer().equals(player)) {
+                    continue;
+                }
+
+                if (player instanceof HumanPlayer) {
+                    var candidateMoves = piece.getAvailableMoves(this, new Place(i, j));
+                    moves.addAll(Arrays.asList(candidateMoves));
+                }
+
+                else if (player instanceof ComputerPlayer) {
+                    System.out.println("Computer is figuring out next move...");
+                    var candidateMove = piece.getCandidateMove(this, new Place(i, j));
+                    moves.add(candidateMove);
+                }
+            }
+        }
+        return moves.toArray(new Move[0]);*/
     }
+
 
     /**
      * Undo a move of {@link HumanPlayer}
@@ -229,6 +277,45 @@ public class JesonMor extends Game {
     @Override
     public void undo() throws UndoException {
         //TODO
+        if (!(getConfiguration().getPlayers()[0] instanceof HumanPlayer && getConfiguration().getPlayers()[1] instanceof ComputerPlayer
+                || getConfiguration().getPlayers()[0] instanceof ComputerPlayer && getConfiguration().getPlayers()[1] instanceof HumanPlayer)) {
+            throw new UndoException("Undo is only supported when there is one human player and one computer player");
+        }
+
+        if (this.moveRecords.size() < 2 || this.numMoves < 2) {
+            throw new UndoException("No further undo is allowed");
+        }
+
+        var firstLastMove = this.moveRecords.get(this.moveRecords.size() - 1).getMove();
+        var firstLastPlayer = this.moveRecords.get(this.moveRecords.size() - 1).getPlayer();
+        var firstSrcPiece = getPiece(firstLastMove.getSource());
+        var firstDesPiece = getPiece(firstLastMove.getDestination());
+
+        var secondLastMove = this.moveRecords.get(this.moveRecords.size() - 2).getMove();
+        var secondLastPlayer = this.moveRecords.get(this.moveRecords.size() - 2).getPlayer();
+        var secondSrcPiece = getPiece(secondLastMove.getSource());
+        var secondDesPiece = getPiece(secondLastMove.getDestination());
+
+        // revert the moves
+        if (firstSrcPiece != null) {
+
+        }
+
+        this.board[firstLastMove.getDestination().x()][firstLastMove.getDestination().y()] = firstSrcPiece;
+        this.board[firstLastMove.getSource().x()][firstLastMove.getSource().y()] = firstDesPiece;
+
+        this.board[secondLastMove.getDestination().x()][secondLastMove.getDestination().y()] = secondSrcPiece;
+        this.board[secondLastMove.getSource().x()][secondLastMove.getSource().y()] = secondDesPiece;
+
+        // update the information
+        this.numMoves -= 2;
+        firstLastPlayer.setScore(this.lastScores.get(this.numMoves)[0]);
+        secondLastPlayer.setScore(this.lastScores.get(this.numMoves)[1]);
+        this.moveRecords.remove(this.moveRecords.size() - 1);
+        this.moveRecords.remove(this.moveRecords.size() - 1);
+
+        this.refreshOutput();
+        System.out.println("Game state reverted");
     }
 
     /**

@@ -40,9 +40,7 @@ public class Knight extends Piece {
     }
 
     public Knight(Player player) {
-        super(
-                player
-        );
+        super(player);
         this.candidateMoveQueue = new LinkedBlockingDeque<>();
         this.calculateMoveParametersQueue = new LinkedBlockingDeque<>();
     }
@@ -56,10 +54,8 @@ public class Knight extends Piece {
     public Move[] getAvailableMoves(Game game, Place source) {
         var moves = new ArrayList<Move>();
         var steps = new int[]{1, -1, 2, -2};
-        for (var stepX :
-                steps) {
-            for (var stepY :
-                    steps) {
+        for (var stepX : steps) {
+            for (var stepY : steps) {
                 var destination = new Place(source.x() + stepX, source.y() + stepY);
                 if (Math.abs(destination.x() - source.x()) + Math.abs(destination.y() - source.y()) == 3) {
                     moves.add(new Move(source, destination));
@@ -67,8 +63,8 @@ public class Knight extends Piece {
             }
         }
         return moves.stream()
-                .filter(move -> validateMove(game, move))
-                .toArray(Move[]::new);
+                    .filter(move -> validateMove(game, move))
+                    .toArray(Move[]::new);
     }
 
     /**
@@ -106,8 +102,7 @@ public class Knight extends Piece {
                 // newly added rule
                 new CriticalRegionRule(),
         };
-        for (var rule :
-                rules) {
+        for (var rule : rules) {
             if (!rule.validate(game, move)) {
                 return false;
             }

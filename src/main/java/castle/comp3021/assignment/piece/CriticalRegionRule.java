@@ -19,7 +19,7 @@ public class CriticalRegionRule implements Rule {
     @Override
     public boolean validate(Game game, Move move) {
         //TODO
-        return false;
+        return true;
     }
 
     /**
@@ -34,7 +34,7 @@ public class CriticalRegionRule implements Rule {
      */
     private boolean isInCriticalRegion(Game game, Place place) {
         //TODO
-        return false;
+        return true;
     }
 
     @Override

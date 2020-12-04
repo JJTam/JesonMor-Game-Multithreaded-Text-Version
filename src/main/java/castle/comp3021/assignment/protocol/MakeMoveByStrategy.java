@@ -7,7 +7,7 @@ public class MakeMoveByStrategy {
     private final Game game;
     private final Move[] availableMoves;
 
-    public MakeMoveByStrategy(Game game, Move[] availableMoves, Strategy strategy){
+    public MakeMoveByStrategy(Game game, Move[] availableMoves, Strategy strategy) {
         this.game = game;
         this.availableMoves = availableMoves;
         this.strategy = strategy;
@@ -21,7 +21,7 @@ public class MakeMoveByStrategy {
      *
      * @return a next move
      */
-    public Move getNextMove(){
+    public Move getNextMove() {
         // TODO
         return this.availableMoves[0];
     }

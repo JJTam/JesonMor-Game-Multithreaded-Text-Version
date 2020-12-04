@@ -146,10 +146,8 @@ public abstract class Game implements Cloneable {
         System.out.println();
         System.out.println("Total Moves: " + this.numMoves);
         // print scores of players
-        for (var player :
-                this.configuration.getPlayers()) {
-            System.out.printf("%s%s%s score: %d\n", player.getColor(), player.getName(), Color.DEFAULT,
-                    player.getScore());
+        for (var player : this.configuration.getPlayers()) {
+            System.out.printf("%s%s%s score: %d\n", player.getColor(), player.getName(), Color.DEFAULT, player.getScore());
         }
         System.out.println();
         // print the boardgame

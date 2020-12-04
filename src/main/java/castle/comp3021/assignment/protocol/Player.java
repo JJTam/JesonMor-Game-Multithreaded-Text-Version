@@ -104,8 +104,7 @@ public abstract class Player implements Cloneable {
                 new KnightBlockRule(),
                 new CriticalRegionRule(),
         };
-        for (var rule :
-                rules) {
+        for (var rule : rules) {
             if (!rule.validate(game, move)) {
                 return rule.getDescription();
             }
