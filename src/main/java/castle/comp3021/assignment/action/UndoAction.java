@@ -1,6 +1,6 @@
 package castle.comp3021.assignment.action;
 
-import castle.comp3021.assignment.player.ComputerPlayer;
+import castle.comp3021.assignment.player.HumanPlayer;
 import castle.comp3021.assignment.protocol.Action;
 import castle.comp3021.assignment.protocol.Game;
 import castle.comp3021.assignment.protocol.exception.ActionException;
@@ -31,7 +31,9 @@ public class UndoAction extends Action {
     public void perform() throws ActionException {
         //TODO
         try {
-            this.game.undo();
+            if (this.game.getCurrentPlayer() instanceof HumanPlayer) { // only human player can undo
+                this.game.undo();
+            }
         } catch (UndoException e) {
             throw new ActionException(e.getMessage());
         }

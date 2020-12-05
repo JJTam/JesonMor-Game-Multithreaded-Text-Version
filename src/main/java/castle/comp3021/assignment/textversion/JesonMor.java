@@ -43,8 +43,9 @@ public class JesonMor extends Game {
 
     // helper variables for undo()
     private final List<Integer[]> lastScores = new ArrayList<>();
-    private final List<Piece> lastPieces = new ArrayList<>();
-
+    private final List<Piece[]> lastPieces = new ArrayList<>();
+    private final List<Move> lastMoves = new ArrayList<>();
+    private final List<Player> lastPlayers = new ArrayList<>();
 
     /**
      * Start the game
@@ -78,18 +79,22 @@ public class JesonMor extends Game {
                     winner = player;
                 }
             } else {
-                // stored information for undo()
-                this.lastScores.add(new Integer[]{this.configuration.getPlayers()[0].getScore(),
-                        this.configuration.getPlayers()[1].getScore()});
-
                 var move = player.nextMove(this, availableMoves);
                 var movedPiece = this.getPiece(move.getSource());
+
+                // stored information for undo()
+                this.lastScores.add(new Integer[]{this.configuration.getPlayers()[0].getScore(),
+                                                  this.configuration.getPlayers()[1].getScore()});
+                this.lastMoves.add(move);
+                this.lastPieces.add(new Piece[]{getPiece(move.getSource()), getPiece(move.getDestination())});
+                this.lastPlayers.add(this.currentPlayer);
+
                 // make move
                 this.movePiece(move);
                 this.numMoves++;
                 System.out.println(player.getName() + " moved piece at " + move.getSource() + "to " + move.getDestination());
                 this.updateScore(player, movedPiece, move);
-                this.lastPieces.add(movedPiece);
+
                 this.refreshOutput();
 
                 // check if there is a winner and if there is, return the winner.
@@ -286,34 +291,28 @@ public class JesonMor extends Game {
             throw new UndoException("No further undo is allowed");
         }
 
-        var firstLastMove = this.moveRecords.get(this.moveRecords.size() - 1).getMove();
-        var firstLastPlayer = this.moveRecords.get(this.moveRecords.size() - 1).getPlayer();
-        var firstSrcPiece = getPiece(firstLastMove.getSource());
-        var firstDesPiece = getPiece(firstLastMove.getDestination());
-
-        var secondLastMove = this.moveRecords.get(this.moveRecords.size() - 2).getMove();
-        var secondLastPlayer = this.moveRecords.get(this.moveRecords.size() - 2).getPlayer();
-        var secondSrcPiece = getPiece(secondLastMove.getSource());
-        var secondDesPiece = getPiece(secondLastMove.getDestination());
-
         // revert the moves
-        if (firstSrcPiece != null) {
-
+        for (int i = this.numMoves - 1; i >= this.numMoves - 2; i--) {
+            this.board[this.lastMoves.get(i).getDestination().x()]
+                      [this.lastMoves.get(i).getDestination().y()] = this.lastPieces.get(i)[1];
+            this.board[this.lastMoves.get(i).getSource().x()]
+                      [this.lastMoves.get(i).getSource().y()] = this.lastPieces.get(i)[0];
         }
 
-        this.board[firstLastMove.getDestination().x()][firstLastMove.getDestination().y()] = firstSrcPiece;
-        this.board[firstLastMove.getSource().x()][firstLastMove.getSource().y()] = firstDesPiece;
-
-        this.board[secondLastMove.getDestination().x()][secondLastMove.getDestination().y()] = secondSrcPiece;
-        this.board[secondLastMove.getSource().x()][secondLastMove.getSource().y()] = secondDesPiece;
-
         // update the information
-        this.numMoves -= 2;
-        firstLastPlayer.setScore(this.lastScores.get(this.numMoves)[0]);
-        secondLastPlayer.setScore(this.lastScores.get(this.numMoves)[1]);
-        this.moveRecords.remove(this.moveRecords.size() - 1);
-        this.moveRecords.remove(this.moveRecords.size() - 1);
+        this.lastPlayers.get(this.numMoves - 1).setScore(this.lastScores.get(this.numMoves - 2)[1]);
+        this.lastPlayers.get(this.numMoves - 2).setScore(this.lastScores.get(this.numMoves - 2)[0]);
 
+        // clean the undone parts
+        for (int i = this.numMoves - 1; i >= this.numMoves - 2; i--) {
+            this.moveRecords.remove(i);
+            this.lastScores.remove(i);
+            this.lastPieces.remove(i);
+            this.lastMoves.remove(i);
+            this.lastPlayers.remove(i);
+        }
+
+        this.numMoves -= 2;  // update the num of moves
         this.refreshOutput();
         System.out.println("Game state reverted");
     }
@@ -334,6 +333,15 @@ public class JesonMor extends Game {
     @Override
     public void showHistoryMove() {
         //TODO
+        if (this.moveRecords.isEmpty()) {
+            System.out.println("No move history.");
+            return;
+        }
+        System.out.println("\nGame History:");
+        for (var rec : this.moveRecords) {
+            System.out.println(rec.toString());
+        }
+        System.out.println();
     }
 
     @Override
