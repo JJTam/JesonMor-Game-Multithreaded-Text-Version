@@ -84,7 +84,7 @@ public class Archer extends Piece {
      * @return one candidate move
      */
     @Override
-    public Move getCandidateMove(Game game, Place source) {
+    public synchronized Move getCandidateMove(Game game, Place source) {
         //TODO
         return null;
     }

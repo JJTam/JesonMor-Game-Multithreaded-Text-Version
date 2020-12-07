@@ -23,6 +23,9 @@ public class MakeMoveByStrategy {
      */
     public Move getNextMove() {
         // TODO
-        return this.availableMoves[0];
+        return new Move(1, 4, 1, 2 );
+
+
+//        return this.availableMoves[0];
     }
 }

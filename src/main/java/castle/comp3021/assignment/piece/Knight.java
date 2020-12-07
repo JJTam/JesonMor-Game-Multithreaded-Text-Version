@@ -1,11 +1,13 @@
 package castle.comp3021.assignment.piece;
 
 import castle.comp3021.assignment.protocol.*;
+import castle.comp3021.assignment.textversion.JesonMor;
 
+import javax.management.timer.Timer;
 import java.util.ArrayList;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 
 /**
  * Knight piece that moves similar to knight in chess.
@@ -87,8 +89,17 @@ public class Knight extends Piece {
     @Override
     public synchronized Move getCandidateMove(Game game, Place source) {
         //TODO
+        try {
+            this.wait(100);
+        } catch (InterruptedException e) {
+            this.calculateMoveParametersQueue.add(new Object[]{game, source});
+            this.notify();
+            return this.candidateMoveQueue.poll();
+        }
         return null;
     }
+
+
 
     private boolean validateMove(Game game, Move move) {
         var rules = new Rule[]{
@@ -133,6 +144,7 @@ public class Knight extends Piece {
     @Override
     public void pause() {
         //TODO
+        this.running.set(false);
     }
 
     /**
@@ -144,6 +156,10 @@ public class Knight extends Piece {
     @Override
     public void resume() {
         //TODO
+        this.running.set(true);
+        synchronized (this) {
+            notifyAll();
+        }
     }
 
     /**
@@ -155,6 +171,7 @@ public class Knight extends Piece {
     @Override
     public void terminate() {
         //TODO
+        this.stopped.set(true);
     }
 
     /**
@@ -164,7 +181,7 @@ public class Knight extends Piece {
      *          - this thread should be waiting ({@link Object#wait()})
      *      - When it is the turn of the player which this piece belongs to (marked by {@link Knight#running}):
      *          - take out the {@link Game} and {@link Place} objects from calculateMoveParametersQueue
-     *          - propose a candidate move (you may take advantage of {@link Archer#getAvailableMoves}
+     *          - propose a candidate move (you may take advantage of {@link Knight#getAvailableMoves}
      *            using {@link MakeMoveByBehavior#getNextMove()} according to {@link this#behavior}
      *                      come up with any strategy to pick one from {@link Knight#getAvailableMoves(Game, Place)}
      *          - add the proposed candidate move to {@link Knight#candidateMoveQueue}
@@ -175,5 +192,34 @@ public class Knight extends Piece {
     @Override
     public void run() {
         //TODO
+        while(!this.stopped.get()) {
+            try {
+                synchronized (this) {
+                    while (this.calculateMoveParametersQueue.isEmpty()) {
+                        System.out.println(Thread.currentThread().getName() + " waiting(empty queue/pausing piece)");
+                        this.wait();
+                    }
+
+                    var objects = this.calculateMoveParametersQueue.poll();
+                    if (objects != null) {
+                        var game = (JesonMor) objects[0];
+                        var place = (Place) objects[1];
+                        while (!game.getCurrentPlayer().equals(this.getPlayer())) {
+                            System.out.println(Thread.currentThread().getName() + " waiting(not this player's turn)");
+                            this.wait();
+                        }
+
+                        if (this.running.get()) {
+                            var availableMoves = getAvailableMoves(game, place);
+                            candidateMoveQueue.add(new MakeMoveByBehavior(game, availableMoves, this.behavior).getNextMove());
+                            System.out.println(Thread.currentThread().getName() + " running");
+                        }
+
+                    }
+                }
+            } catch (InterruptedException ignored) {
+            }
+        }
     }
+
 }

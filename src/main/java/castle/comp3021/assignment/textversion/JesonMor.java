@@ -42,6 +42,7 @@ public class JesonMor extends Game {
     private List<MoveRecord> moveRecords = new ArrayList<>();
 
     // helper variables for undo()
+    private int numOfUndo = 0;
     private final List<Integer[]> lastScores = new ArrayList<>();
     private final List<Piece[]> lastPieces = new ArrayList<>();
     private final List<Move> lastMoves = new ArrayList<>();
@@ -214,7 +215,7 @@ public class JesonMor extends Game {
      */
     public @NotNull Move[] getAvailableMoves(Player player) {
         //TODO
-        var moves = new ArrayList<Move>();
+/*        var moves = new ArrayList<Move>();
         // find all pieces belonging to the player
         for (int i = 0; i < this.configuration.getSize(); i++) {
             for (int j = 0; j < this.configuration.getSize(); j++) {
@@ -229,9 +230,9 @@ public class JesonMor extends Game {
                 moves.addAll(Arrays.asList(candidateMoves));
             }
         }
-        return moves.toArray(new Move[0]);
+        return moves.toArray(new Move[0]);*/
 
-        /*var moves = new ArrayList<Move>();
+        var moves = new ArrayList<Move>();
         for (int i = 0; i < this.configuration.getSize(); i++) {
             for (int j = 0; j < this.configuration.getSize(); j++) {
                 var piece = this.getPiece(i, j);
@@ -249,13 +250,16 @@ public class JesonMor extends Game {
                 }
 
                 else if (player instanceof ComputerPlayer) {
-                    System.out.println("Computer is figuring out next move...");
                     var candidateMove = piece.getCandidateMove(this, new Place(i, j));
                     moves.add(candidateMove);
                 }
             }
         }
-        return moves.toArray(new Move[0]);*/
+
+        if (player instanceof ComputerPlayer)
+            System.out.println("Computer is figuring out next move...");
+
+        return moves.toArray(new Move[0]);
     }
 
 
@@ -287,7 +291,7 @@ public class JesonMor extends Game {
             throw new UndoException("Undo is only supported when there is one human player and one computer player");
         }
 
-        if (this.moveRecords.size() < 2 || this.numMoves < 2) {
+        if (this.moveRecords.size() < 2 || this.numMoves < 2 || numOfUndo >= UNDO_LIMIT) {
             throw new UndoException("No further undo is allowed");
         }
 
@@ -311,7 +315,7 @@ public class JesonMor extends Game {
             this.lastMoves.remove(i);
             this.lastPlayers.remove(i);
         }
-
+        this.numOfUndo++;
         this.numMoves -= 2;  // update the num of moves
         this.refreshOutput();
         System.out.println("Game state reverted");

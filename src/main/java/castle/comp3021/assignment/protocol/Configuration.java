@@ -3,12 +3,12 @@ package castle.comp3021.assignment.protocol;
 import castle.comp3021.assignment.piece.Archer;
 import castle.comp3021.assignment.piece.Knight;
 import castle.comp3021.assignment.player.ComputerPlayer;
-import castle.comp3021.assignment.player.ConsolePlayer;
 import castle.comp3021.assignment.protocol.exception.InvalidConfigurationError;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -207,7 +207,13 @@ public class Configuration implements Cloneable {
         this.initialBoard[place.x()][place.y()] = piece;
 
         // TODO
-        // start piece thread and update {@link Configuration#pieceThreadMap} here
+        // start piece thread and update pieceThreadMap
+        if (piece.getPlayer() instanceof ComputerPlayer) {  // only computer player has threads to pieces
+            var pieceThread = new Thread(piece);
+            this.pieceThreadMap.put(piece, pieceThread);
+            pieceThread.start();
+            System.out.println(pieceThread.getName());
+        }
     }
 
     public void addInitialPiece(Piece piece, int x, int y) {
