@@ -8,7 +8,6 @@ import castle.comp3021.assignment.protocol.exception.InvalidConfigurationError;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -212,7 +211,6 @@ public class Configuration implements Cloneable {
             var pieceThread = new Thread(piece);
             this.pieceThreadMap.put(piece, pieceThread);
             pieceThread.start();
-            System.out.println(pieceThread.getName());
         }
     }
 

@@ -2,6 +2,9 @@ package castle.comp3021.assignment.protocol;
 
 import castle.comp3021.assignment.piece.Knight;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 public class MakeMoveByBehavior {
     private final Behavior behavior;
     private final Game game;
@@ -25,9 +28,68 @@ public class MakeMoveByBehavior {
      *
      * @return a selected move adopting strategy specified by {@link this#behavior}
      */
-    public Move getNextMove(){
+    public Move getNextMove() {
         // TODO
-        return this.availableMoves[0];
+        switch (this.behavior) {
+            case RANDOM -> {
+                return this.availableMoves[new Random().nextInt(this.availableMoves.length)];
+            }
+
+            case GREEDY -> {
+                var minDistance = Integer.MAX_VALUE;
+                var bestMove =  this.availableMoves[0];
+                for (var move : this.availableMoves) {
+                    var distance = Math.abs(move.getDestination().x() - move.getSource().x()) +
+                            Math.abs(move.getDestination().y() - move.getSource().y());
+                    if (distance <= minDistance) {
+                        minDistance = distance;
+                        bestMove = move;
+                    }
+                }
+                return bestMove;
+            }
+
+            case CAPTURING -> {
+                // num of move protection
+                if (this.game.getNumMoves() <= this.game.getConfiguration().numMovesProtection) {
+                    return this.availableMoves[new Random().nextInt(this.availableMoves.length)];
+                }
+                var movesList = new ArrayList<Move>();
+                for (var move : this.availableMoves) {
+                    var capturePiece = this.game.getPiece(move.getDestination());
+                    if (capturePiece != null) {
+                        movesList.add(move);
+                    }
+                }
+                return movesList.get(new Random().nextInt(movesList.size()));
+            }
+
+            case BLOCKING -> {
+                var movesList = new ArrayList<Move>();
+                for (var move : this.availableMoves) {
+                    var size = this.game.getConfiguration().getSize();
+                    var destX = move.getDestination().x();
+                    var destY = move.getDestination().y();
+                    var upX = destX + 1;
+                    var downX = destX - 1;
+                    var upY = destY + 1;
+                    var downY = destY - 1;
+
+                    if (upX < size && downY >= 0) {
+
+                    }
+
+
+
+                        movesList.add(move);
+
+                }
+
+
+            }
+
+        }
+        return this.availableMoves[new Random().nextInt(this.availableMoves.length)];
     }
 }
 

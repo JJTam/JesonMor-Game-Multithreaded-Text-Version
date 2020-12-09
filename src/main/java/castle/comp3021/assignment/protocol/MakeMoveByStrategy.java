@@ -2,6 +2,8 @@ package castle.comp3021.assignment.protocol;
 
 import castle.comp3021.assignment.piece.Knight;
 
+import java.util.Random;
+
 public class MakeMoveByStrategy {
     private final Strategy strategy;
     private final Game game;
@@ -23,9 +25,7 @@ public class MakeMoveByStrategy {
      */
     public Move getNextMove() {
         // TODO
-        return new Move(1, 4, 1, 2 );
 
-
-//        return this.availableMoves[0];
+        return this.availableMoves[new Random().nextInt(this.availableMoves.length)];
     }
 }

@@ -215,24 +215,11 @@ public class JesonMor extends Game {
      */
     public @NotNull Move[] getAvailableMoves(Player player) {
         //TODO
-/*        var moves = new ArrayList<Move>();
-        // find all pieces belonging to the player
-        for (int i = 0; i < this.configuration.getSize(); i++) {
-            for (int j = 0; j < this.configuration.getSize(); j++) {
-                var piece = this.getPiece(i, j);
-                if (piece == null) {
-                    continue;
-                }
-                if (!piece.getPlayer().equals(player)) {
-                    continue;
-                }
-                var candidateMoves = piece.getAvailableMoves(this, new Place(i, j));
-                moves.addAll(Arrays.asList(candidateMoves));
-            }
-        }
-        return moves.toArray(new Move[0]);*/
-
         var moves = new ArrayList<Move>();
+
+        if (player instanceof ComputerPlayer)
+            System.out.println("Computer is figuring out next move...");
+
         for (int i = 0; i < this.configuration.getSize(); i++) {
             for (int j = 0; j < this.configuration.getSize(); j++) {
                 var piece = this.getPiece(i, j);
@@ -251,14 +238,14 @@ public class JesonMor extends Game {
 
                 else if (player instanceof ComputerPlayer) {
                     var candidateMove = piece.getCandidateMove(this, new Place(i, j));
+                    if (candidateMove == null) {
+                        System.out.println("NUll");
+                        continue;
+                    }
                     moves.add(candidateMove);
                 }
             }
         }
-
-        if (player instanceof ComputerPlayer)
-            System.out.println("Computer is figuring out next move...");
-
         return moves.toArray(new Move[0]);
     }
 

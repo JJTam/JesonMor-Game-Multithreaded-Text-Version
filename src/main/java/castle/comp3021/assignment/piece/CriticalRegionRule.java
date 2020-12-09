@@ -9,7 +9,7 @@ public class CriticalRegionRule implements Rule {
 
 
     /**
-     * Validate whether the proposed  move will violate the critical region rule
+     * Validate whether the proposed move will violate the critical region rule
      * I.e., there are no more than {@link Configuration#getCriticalRegionCapacity()} in the critical region.
      * Determine whether the move is in critical region, using {@link this#isInCriticalRegion(Game, Place)}
      * @param game the current game object
@@ -19,6 +19,24 @@ public class CriticalRegionRule implements Rule {
     @Override
     public boolean validate(Game game, Move move) {
         //TODO
+        int capacityCount = 0;
+        for (int i = 0; i < game.getConfiguration().getSize(); i++) {
+            for (int j = 0; j < game.getConfiguration().getSize(); j++)  {
+                if (isInCriticalRegion(game, new Place(i,j))) {
+                    var piece = game.getPiece(i,j);
+                    if (piece instanceof Knight && piece.getPlayer().equals(game.getCurrentPlayer())) {
+                        capacityCount++;
+                    }
+                }
+            }
+        }
+        // only check Knight moving into, dont check moving out/ moving inside
+        if (game.getPiece(move.getSource()) instanceof Knight
+                && !isInCriticalRegion(game, move.getSource())
+                && isInCriticalRegion(game, move.getDestination())) {
+            return ((capacityCount + 1) <= game.getConfiguration().getCriticalRegionCapacity());
+        }
+
         return true;
     }
 
@@ -34,8 +52,13 @@ public class CriticalRegionRule implements Rule {
      */
     private boolean isInCriticalRegion(Game game, Place place) {
         //TODO
-        return true;
+        int offset = (game.getConfiguration().getCriticalRegionSize() - 1) / 2;
+        int centralRow = game.getCentralPlace().y();
+        int upperBound = centralRow + offset;
+        int lowerBound = centralRow - offset;
+        return (place.y() >= lowerBound && place.y() <= upperBound);
     }
+
 
     @Override
     public String getDescription() {

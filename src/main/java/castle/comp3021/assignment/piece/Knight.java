@@ -3,9 +3,9 @@ package castle.comp3021.assignment.piece;
 import castle.comp3021.assignment.protocol.*;
 import castle.comp3021.assignment.textversion.JesonMor;
 
-import javax.management.timer.Timer;
 import java.util.ArrayList;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -33,6 +33,8 @@ public class Knight extends Piece {
      * until parameters {@link Game} and {@link Place} are passed in, the thread starts calculate the candidate move.
      */
     private final BlockingDeque<Object[]> calculateMoveParametersQueue;
+
+    private final AtomicBoolean isTimeout = new AtomicBoolean(true);
 
 
     public Knight(Player player, Behavior behavior) {
@@ -89,16 +91,51 @@ public class Knight extends Piece {
     @Override
     public synchronized Move getCandidateMove(Game game, Place source) {
         //TODO
-        try {
-            this.wait(100);
-        } catch (InterruptedException e) {
-            this.calculateMoveParametersQueue.add(new Object[]{game, source});
-            this.notify();
-            return this.candidateMoveQueue.poll();
+        if (!this.running.get()) {
+            System.out.println("Paused");
+            return null;
         }
-        return null;
+
+        // reset
+        this.isTimeout.set(true);
+        this.candidateMoveQueue.clear();
+        this.calculateMoveParametersQueue.clear();
+        this.calculateMoveParametersQueue.add(new Object[]{game, source});
+
+        var pieceThread = game.getConfiguration().getPieceThread(game.getPiece(source));
+        Thread thread = new Thread(() -> timeoutCounter(pieceThread));
+        thread.start();
+        this.notify();
+        try {
+            while (!pieceThread.isInterrupted()) {
+                this.wait(1000);  // one second time out
+                if (!this.isTimeout.get()) {
+                    System.out.println("Got K");
+                    return candidateMoveQueue.poll();
+                }
+                else if (this.isTimeout.get()) {
+                    System.out.println("Timeout K");
+                    return null;
+                }
+            }
+        } catch (InterruptedException ignored) {
+        }
+
+        return this.candidateMoveQueue.poll();
+
     }
 
+    private void timeoutCounter(Thread pieceThread) {
+        long endTimeMillis = System.currentTimeMillis() + 1000;
+        while (true) {
+            // method logic
+            if (System.currentTimeMillis() > endTimeMillis) {
+                this.isTimeout.set(true);
+                pieceThread.interrupt();
+                return;
+            }
+        }
+    }
 
 
     private boolean validateMove(Game game, Move move) {
@@ -196,7 +233,7 @@ public class Knight extends Piece {
             try {
                 synchronized (this) {
                     while (this.calculateMoveParametersQueue.isEmpty()) {
-                        System.out.println(Thread.currentThread().getName() + " waiting(empty queue/pausing piece)");
+//                        System.out.println(Thread.currentThread().getName() + " waiting(empty queue/pausing piece)");
                         this.wait();
                     }
 
@@ -205,19 +242,25 @@ public class Knight extends Piece {
                         var game = (JesonMor) objects[0];
                         var place = (Place) objects[1];
                         while (!game.getCurrentPlayer().equals(this.getPlayer())) {
-                            System.out.println(Thread.currentThread().getName() + " waiting(not this player's turn)");
+//                            System.out.println(Thread.currentThread().getName() + " waiting(not this player's turn)");
                             this.wait();
                         }
 
                         if (this.running.get()) {
                             var availableMoves = getAvailableMoves(game, place);
-                            candidateMoveQueue.add(new MakeMoveByBehavior(game, availableMoves, this.behavior).getNextMove());
-                            System.out.println(Thread.currentThread().getName() + " running");
+                            System.out.println("L = " + availableMoves.length);
+                            if (availableMoves.length != 0) {
+                                this.candidateMoveQueue.add(new MakeMoveByBehavior(game, availableMoves, this.behavior).getNextMove());
+                                this.isTimeout.set(false);
+                            }
+                            this.notify();
+//                            System.out.println(Thread.currentThread().getName() + " running");
                         }
-
                     }
                 }
             } catch (InterruptedException ignored) {
+                this.isTimeout.set(true);
+                this.candidateMoveQueue.clear();
             }
         }
     }

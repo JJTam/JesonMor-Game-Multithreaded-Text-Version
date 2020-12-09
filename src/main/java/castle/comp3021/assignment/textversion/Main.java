@@ -22,8 +22,8 @@ public class Main {
         blackPlayer = new ComputerPlayer("Black");
         size = 5;
         numMovesProtection = 1;
-        criticalRegionSize = 1;
-        criticalRegionCapacity = 1;
+        criticalRegionSize = 3;
+        criticalRegionCapacity = 2;
     }
 
     /**

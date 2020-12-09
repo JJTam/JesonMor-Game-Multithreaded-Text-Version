@@ -14,8 +14,7 @@ public class EventuallyWinPlayer extends MockPlayer {
     public @NotNull Move nextMove(Game game, Move[] availableMoves) {
         var minDistance = Integer.MAX_VALUE;
         var best = availableMoves[0];
-        for (var move :
-                availableMoves) {
+        for (var move : availableMoves) {
             var dist = Math.abs(move.getDestination().x() - move.getSource().x()) +
                     Math.abs(move.getDestination().y() - move.getSource().y());
             if (dist <= minDistance) {
