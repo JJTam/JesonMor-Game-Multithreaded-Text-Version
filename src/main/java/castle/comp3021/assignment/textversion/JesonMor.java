@@ -203,12 +203,12 @@ public class JesonMor extends Game {
      * Get all available moves of one player.
      * The different between the original implementation is that in PA3
      * - for {@link HumanPlayer} (including {@link castle.comp3021.assignment.player.ConsolePlayer}:
-     *          the returned available moves should be an array of ALL available moves
+     *  the returned available moves should be an array of ALL available moves
      * - for {@link ComputerPlayer}:
-     *          before a candidate move is proposed, print "Computer is figuring out next move..."
-     *          return an array containing candidate moves proposed by each piece thread of computer player. 
-     *          Paused/terminated pieces will not propose candidate moves. 
-     *          The number of moves in the array should be the same as the number of non-paused/non-terminated pieces. 
+     *  before a candidate move is proposed, print "Computer is figuring out next move..."
+     *  return an array containing candidate moves proposed by each piece thread of computer player.
+     *  Paused/terminated pieces will not propose candidate moves.
+     *  The number of moves in the array should be the same as the number of non-paused/non-terminated pieces.
      *
      * @param player the player whose available moves to get
      * @return an array of available moves
@@ -234,15 +234,11 @@ public class JesonMor extends Game {
                 if (player instanceof HumanPlayer) {
                     var candidateMoves = piece.getAvailableMoves(this, new Place(i, j));
                     moves.addAll(Arrays.asList(candidateMoves));
-                }
-
-                else if (player instanceof ComputerPlayer) {
+                } else if (player instanceof ComputerPlayer) {
                     var candidateMove = piece.getCandidateMove(this, new Place(i, j));
-                    if (candidateMove == null) {
-                        System.out.println("NUll");
-                        continue;
+                    if (candidateMove != null) {
+                        moves.add(candidateMove);
                     }
-                    moves.add(candidateMove);
                 }
             }
         }
@@ -273,8 +269,10 @@ public class JesonMor extends Game {
     @Override
     public void undo() throws UndoException {
         //TODO
-        if (!(getConfiguration().getPlayers()[0] instanceof HumanPlayer && getConfiguration().getPlayers()[1] instanceof ComputerPlayer
-                || getConfiguration().getPlayers()[0] instanceof ComputerPlayer && getConfiguration().getPlayers()[1] instanceof HumanPlayer)) {
+        if (!(getConfiguration().getPlayers()[0] instanceof HumanPlayer
+                    && getConfiguration().getPlayers()[1] instanceof ComputerPlayer
+                || getConfiguration().getPlayers()[0] instanceof ComputerPlayer
+                    && getConfiguration().getPlayers()[1] instanceof HumanPlayer)) {
             throw new UndoException("Undo is only supported when there is one human player and one computer player");
         }
 

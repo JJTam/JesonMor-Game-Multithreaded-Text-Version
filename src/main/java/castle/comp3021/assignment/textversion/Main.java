@@ -2,11 +2,8 @@ package castle.comp3021.assignment.textversion;
 
 import castle.comp3021.assignment.piece.Archer;
 import castle.comp3021.assignment.piece.Knight;
-import castle.comp3021.assignment.player.ConsolePlayer;
 import castle.comp3021.assignment.player.ComputerPlayer;
-import castle.comp3021.assignment.protocol.Configuration;
-import castle.comp3021.assignment.protocol.Game;
-import castle.comp3021.assignment.protocol.Player;
+import castle.comp3021.assignment.protocol.*;
 import castle.comp3021.assignment.protocol.exception.InvalidConfigurationError;
 
 public class Main {
@@ -18,11 +15,13 @@ public class Main {
     protected static int criticalRegionCapacity;
 
     static {
-        whitePlayer = new ConsolePlayer("White");
-        blackPlayer = new ComputerPlayer("Black");
-        size = 5;
-        numMovesProtection = 1;
-        criticalRegionSize = 3;
+//        whitePlayer = new ConsolePlayer("White");
+//        blackPlayer = new ComputerPlayer("Black");
+        whitePlayer = new ComputerPlayer("PC", Color.BLUE, Strategy.RANDOM);
+        blackPlayer = new ComputerPlayer("AI", Color.GREEN, Strategy.SMART);
+        size = 15;
+        numMovesProtection = 20;
+        criticalRegionSize = 5;
         criticalRegionCapacity = 2;
     }
 
@@ -46,10 +45,10 @@ public class Main {
 
         for (int i = 0; i < size; i++) {
             if (i % 2 == 0) {
-                var piece = new Knight(blackPlayer);
+                var piece = new Knight(blackPlayer, Behavior.GREEDY);
                 configuration.addInitialPiece(piece, i, size - 1);
             } else {
-                var piece = new Archer(blackPlayer);
+                var piece = new Archer(blackPlayer, Behavior.BLOCKING);
                 configuration.addInitialPiece(piece, i, size - 1);
             }
         }
@@ -64,7 +63,9 @@ public class Main {
     }
 
     public static void main(String[] args) {
-//        var helper = "four integer arguments are required specifying <size> <numMovesProtection> <criticalRegionSize> <criticalRegionCapacity>";
+// var helper = "four integer arguments are required specifying <size>
+// <numMovesProtection> <criticalRegionSize> <criticalRegionCapacity>";
+
         if (args.length >= 1) {
             try {
                 size = Integer.parseInt(args[0]);

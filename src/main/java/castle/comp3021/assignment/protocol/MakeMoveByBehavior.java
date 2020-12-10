@@ -32,15 +32,16 @@ public class MakeMoveByBehavior {
         // TODO
         switch (this.behavior) {
             case RANDOM -> {
-                return this.availableMoves[new Random().nextInt(this.availableMoves.length)];
+                int index = new Random().nextInt(this.availableMoves.length);
+                return this.availableMoves[index];
             }
 
             case GREEDY -> {
                 var minDistance = Integer.MAX_VALUE;
                 var bestMove =  this.availableMoves[0];
                 for (var move : this.availableMoves) {
-                    var distance = Math.abs(move.getDestination().x() - move.getSource().x()) +
-                            Math.abs(move.getDestination().y() - move.getSource().y());
+                    var distance = Math.abs(this.game.getCentralPlace().x() - move.getDestination().x()) +
+                            Math.abs(this.game.getCentralPlace().y() - move.getDestination().y());
                     if (distance <= minDistance) {
                         minDistance = distance;
                         bestMove = move;
@@ -51,7 +52,7 @@ public class MakeMoveByBehavior {
 
             case CAPTURING -> {
                 // num of move protection
-                if (this.game.getNumMoves() <= this.game.getConfiguration().numMovesProtection) {
+                if (this.game.getNumMoves() <= this.game.getConfiguration().getNumMovesProtection()) {
                     return this.availableMoves[new Random().nextInt(this.availableMoves.length)];
                 }
                 var movesList = new ArrayList<Move>();
@@ -61,35 +62,44 @@ public class MakeMoveByBehavior {
                         movesList.add(move);
                     }
                 }
+                if (movesList.isEmpty()) {
+                    return this.availableMoves[new Random().nextInt(this.availableMoves.length)];
+                }
                 return movesList.get(new Random().nextInt(movesList.size()));
             }
 
             case BLOCKING -> {
                 var movesList = new ArrayList<Move>();
                 for (var move : this.availableMoves) {
-                    var size = this.game.getConfiguration().getSize();
                     var destX = move.getDestination().x();
                     var destY = move.getDestination().y();
-                    var upX = destX + 1;
-                    var downX = destX - 1;
+                    var rightX = destX + 1;
+                    var leftX = destX - 1;
                     var upY = destY + 1;
                     var downY = destY - 1;
-
-                    if (upX < size && downY >= 0) {
-
-                    }
-
-
-
+                    var upPiece = this.game.getPiece(destX, upY);
+                    var downPiece = this.game.getPiece(destX, downY);
+                    var leftPiece = this.game.getPiece(leftX, destY);
+                    var rightPiece = this.game.getPiece(rightX, destY);
+                    if (upPiece != null || downPiece != null || leftPiece != null || rightPiece != null) {
+                        if ((upPiece instanceof Knight && !upPiece.getPlayer().equals(this.game.getCurrentPlayer()))
+                                || (downPiece instanceof Knight && !downPiece.getPlayer().equals(this.game.getCurrentPlayer()))
+                                || (leftPiece instanceof Knight && !leftPiece.getPlayer().equals(this.game.getCurrentPlayer()))
+                                || (rightPiece instanceof Knight && !rightPiece.getPlayer().equals(this.game.getCurrentPlayer())))
                         movesList.add(move);
-
+                    }
                 }
-
-
+                if (movesList.isEmpty()) {
+                    return this.availableMoves[new Random().nextInt(this.availableMoves.length)];
+                }
+                return movesList.get(new Random().nextInt(movesList.size()));
             }
 
+            default -> {
+                return this.availableMoves[new Random().nextInt(this.availableMoves.length)];
+            }
         }
-        return this.availableMoves[new Random().nextInt(this.availableMoves.length)];
     }
+
 }
 

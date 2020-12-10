@@ -110,11 +110,10 @@ public class Knight extends Piece {
             while (!pieceThread.isInterrupted()) {
                 this.wait(1000);  // one second time out
                 if (!this.isTimeout.get()) {
-                    System.out.println("Got K");
+//                    System.out.println("Got K");
                     return candidateMoveQueue.poll();
-                }
-                else if (this.isTimeout.get()) {
-                    System.out.println("Timeout K");
+                } else if (this.isTimeout.get()) {
+//                    System.out.println("Timeout K");
                     return null;
                 }
             }
@@ -248,7 +247,7 @@ public class Knight extends Piece {
 
                         if (this.running.get()) {
                             var availableMoves = getAvailableMoves(game, place);
-                            System.out.println("L = " + availableMoves.length);
+//                            System.out.println("L = " + availableMoves.length);
                             if (availableMoves.length != 0) {
                                 this.candidateMoveQueue.add(new MakeMoveByBehavior(game, availableMoves, this.behavior).getNextMove());
                                 this.isTimeout.set(false);

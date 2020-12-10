@@ -23,7 +23,7 @@ public class SmartPlayerFactory {
      */
     public static Player generateSmartPlayer(int boardSize) {
         // TODO optional, if you want to change the smart player instantiation
-        return new ComputerPlayer("smart", Color.BLACK, Strategy.SMART);
+        return new ComputerPlayer("AI", Color.GREEN, Strategy.SMART);
     }
 
     /**
@@ -46,7 +46,7 @@ public class SmartPlayerFactory {
             if (i % 2 == 0) {
                 ls.add(new Knight(player, Behavior.GREEDY));
             } else {
-                ls.add(new Archer(player, Behavior.GREEDY));
+                ls.add(new Archer(player, Behavior.CAPTURING));
             }
         }
         return ls.toArray(new Piece[]{});

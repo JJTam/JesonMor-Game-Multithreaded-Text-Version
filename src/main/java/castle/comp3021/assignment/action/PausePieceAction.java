@@ -2,11 +2,9 @@ package castle.comp3021.assignment.action;
 
 import castle.comp3021.assignment.player.ComputerPlayer;
 import castle.comp3021.assignment.player.ConsolePlayer;
-import castle.comp3021.assignment.player.HumanPlayer;
 import castle.comp3021.assignment.protocol.*;
 import castle.comp3021.assignment.protocol.exception.ActionException;
 
-import java.util.Arrays;
 
 /**
  * The action to pause a piece.
@@ -54,7 +52,7 @@ public class PausePieceAction extends Action {
             throw new ActionException("piece does not exist at " + place.toString());
         }
 
-        if (piece.getPlayer() instanceof HumanPlayer) {
+        if (!(piece.getPlayer() instanceof ComputerPlayer)) {
             throw new ActionException("piece at " + place.toString() + " does not belong to computer player, thus can not be paused");
         }
 

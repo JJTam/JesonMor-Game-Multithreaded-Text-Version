@@ -108,11 +108,10 @@ public class Archer extends Piece {
             while (!pieceThread.isInterrupted()) {
                 this.wait(1000);  // one second time out
                 if (!this.isTimeout.get()) {
-                    System.out.println("Got A");
+//                    System.out.println("Got A");
                     return candidateMoveQueue.poll();
-                }
-                else if (this.isTimeout.get()) {
-                    System.out.println("Timeout A");
+                } else if (this.isTimeout.get()) {
+//                    System.out.println("Timeout A");
                     return null;
                 }
             }
@@ -242,7 +241,7 @@ public class Archer extends Piece {
 
                         if (this.running.get()) {
                             var availableMoves = getAvailableMoves(game, place);
-                            System.out.println("L = " + availableMoves.length);
+//                            System.out.println("L = " + availableMoves.length);
                             if (availableMoves.length != 0) {
                                 this.candidateMoveQueue.add(new MakeMoveByBehavior(game, availableMoves, this.behavior).getNextMove());
                                 this.isTimeout.set(false);

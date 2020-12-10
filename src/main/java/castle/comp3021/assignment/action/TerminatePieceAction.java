@@ -2,11 +2,8 @@ package castle.comp3021.assignment.action;
 
 import castle.comp3021.assignment.player.ComputerPlayer;
 import castle.comp3021.assignment.player.ConsolePlayer;
-import castle.comp3021.assignment.player.HumanPlayer;
 import castle.comp3021.assignment.protocol.Action;
 import castle.comp3021.assignment.protocol.Game;
-import castle.comp3021.assignment.protocol.Piece;
-import castle.comp3021.assignment.protocol.Place;
 import castle.comp3021.assignment.protocol.exception.ActionException;
 
 /**
@@ -32,11 +29,11 @@ public class TerminatePieceAction extends Action {
      * Throw {@link ActionException} when exception happens.
      * <p>
      * Related meethods:
-     * - {@link Piece#terminate()}
+     * - {link Piece#terminate()}
      * - {@link Thread#interrupt()}
      * <p>
      * - The piece thread can be get by
-     * {@link castle.comp3021.assignment.protocol.Configuration#getPieceThread(Piece)}
+     * {@link castle.comp3021.assignment.protocol.Configuration# getPieceThread(Piece)}
      */
     @Override
     public void perform() throws ActionException {
@@ -55,7 +52,7 @@ public class TerminatePieceAction extends Action {
             throw new ActionException("piece does not exist at " + place.toString());
         }
 
-        if (piece.getPlayer() instanceof HumanPlayer) {
+        if (!(piece.getPlayer() instanceof ComputerPlayer)) {
             throw new ActionException("piece at " + place.toString() + " does not belong to computer player, thus can not be stopped");
         }
 
